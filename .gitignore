@@ -1,0 +1,6 @@
+.sass-cache/*
+*.DS_Store
+.tmp
+dist
+node_modules
+/src/data/data.*
