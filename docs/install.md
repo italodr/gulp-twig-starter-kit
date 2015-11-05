@@ -1,6 +1,6 @@
 # Install
 
-**tl;dr**: [Download the repo](*repoURL*) and run `$ npm install --global gulp && npm install` in that directory to get started.
+**tl;dr**: [Download the repo](git@github.com:italodr/gulp-twig-starter-kit.git) and run `$ npm install --global gulp && npm install` in that directory to get started.
 
 -
 
@@ -8,13 +8,14 @@ You will need to:
 
 1. Get a copy of the code.
 2. Install the dependencies if you don't already have them.
-3. Modify the application for your project.
-4. Run the code.
-5. Enjoy!
+3. Read the [structure.md](structure.md) file to know where to find the files.
+4. Modify the application for your project.
+5. Run the code.
+6. Enjoy!
 
 ## Getting the code
 
-[Download](*repoURL*).
+[Download](git@github.com:italodr/gulp-twig-starter-kit.git).
 
 ## Prerequisites
 
@@ -42,6 +43,16 @@ $ npm install --global gulp
 ```
 
 *This will install Gulp globally. Depending on your user account, you may need to [configure your system](https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md) to install packages globally without administrative privileges.*
+
+
+### [Grunt](http://gruntjs.com/)
+
+Bring up a terminal and type `grunt --version`.
+If Grunt CLI is installed it should return a version number at or above 0.1.x. If not, run:
+
+```sh
+npm install -g grunt-cli
+```
 
 
 ### Local dependencies

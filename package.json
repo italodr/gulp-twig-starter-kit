@@ -1,11 +1,12 @@
 {
-  "name": "gulp-twig-starter-kit",
+  "name": "gulp twig starter kit",
   "version": "1.0.0",
   "description": "Gulp + Twig starter kit for landings",
   "repository": {
     "type": "git",
-    "url": "git@bitbucket.org:italodr/gulp_boilerplate.git"
+    "url": "git@github.com:italodr/gulp-twig-starter-kit.git"
   },
+  "license": "MIT",
   "dependencies": {
     "gulp": "^3.9.0"
   },
