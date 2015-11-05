@@ -1,19 +1,20 @@
 # Install
 
-**tl;dr**: [Download WSK](https://github.com/google/web-starter-kit/releases/latest) and run `$ npm install --global gulp && npm install` in that directory to get started.
+**tl;dr**: [Download the repo](*repoURL*) and run `$ npm install --global gulp && npm install` in that directory to get started.
 
 -
 
-To take advantage of Web Starter Kit you need to:
+You will need to:
 
 1. Get a copy of the code.
 2. Install the dependencies if you don't already have them.
-3. Modify the application to your liking.
-4. Deploy your production code.
+3. Modify the application for your project.
+4. Run the code.
+5. Enjoy!
 
 ## Getting the code
 
-[Download](https://github.com/google/web-starter-kit/releases/latest) and extract WSK to where you want to work.
+[Download](*repoURL*).
 
 ## Prerequisites
 
@@ -27,6 +28,13 @@ If you require Node, go to [nodejs.org](https://nodejs.org) and click on the big
 
 Bring up a terminal and type `gulp --version`.
 If Gulp is installed it should return a version number at or above 3.9.x.
+
+```sh
+CLI version 3.9.0
+Local version 3.9.0
+```
+
+This project uses ES2015 so it is mandatory to get this Gulp version.
 If you need to install/upgrade Gulp, open up a terminal and type in the following:
 
 ```sh
@@ -38,13 +46,13 @@ $ npm install --global gulp
 
 ### Local dependencies
 
-Next, install the local dependencies Web Starter Kit requires:
+Next, install the local dependencies required:
 
 ```sh
 $ npm install
 ```
 
-That's it! You should now have everything needed to use the Web Starter Kit.
+That's it!
 
 -
 

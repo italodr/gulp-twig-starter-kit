@@ -166,7 +166,7 @@ const routes = {
 // -------------------------------------
 //   Variables
 // -------------------------------------
-const timestamp : new Date().getTime();
+const timestamp = new Date().getTime();
 var opts = {
     json_data : {},
     kaomoji : {
@@ -201,8 +201,8 @@ const options = {
 
     // ----- Build ----- //
     build : {
-        tasks : [ 'clean:dist', 'images', 'css', 'markup' 'javascripts',
-            'copy:fonts' ]
+        tasks : [ 'clean:dist', 'images', 'css', 'markup', 'javascripts',
+                'copy:fonts' ]
     },
 
     // ----- CSS ----- //
@@ -315,8 +315,8 @@ const options = {
     markup : {
         tasks : [ 'concat:json' ],
         files : [
-            routes.src.base +'/*.twig',
-            '!'+ routes.src.base +'/_*.twig',
+            routes.src.markup +'/**/*.twig',
+            '!'+ routes.src.markup +'/**/_*.twig',
             '!'+ routes.src.markup +'/includes/**/*.twig',
             '!'+ routes.src.markup +'/modules/**/*.twig'
         ],
@@ -338,7 +338,7 @@ const options = {
             // Use a Google Developer API key if you have one: http://goo.gl/RkN0vE
             // key: 'YOUR_API_KEY'
         }
-    }
+    },
 
     // ----- SVG ----- //
     svg : {
@@ -355,6 +355,7 @@ const options = {
                 options.css.files,
                 options.markup.watch,
                 options.imagemin.files,
+                options.concat.json.files,
                 options.concat.scripts.files
             ]
         },
@@ -363,6 +364,7 @@ const options = {
                 [ 'css', reload ],
                 [ 'markup', reload ],
                 [ 'images', reload ],
+                [ 'markup', reload ],
                 [ 'javascripts', reload ]
             ]
         }
@@ -374,28 +376,28 @@ const options = {
 // -------------------------------------
 
 gulp.task( 'browserSync', options.browsersync.tasks, () =>
-    browserSync( options.browsersync.args );
+    browserSync( options.browsersync.args )
 );
 
 // -------------------------------------
 //   Task: Build
 // -------------------------------------
 
-gulp.task( 'build', ( callback ) =>
-    var tasks = options.build.tasks;
+gulp.task( 'build', ( callback ) => {
+    let tasks = options.build.tasks;
     tasks.push( callback );
     runSequence.apply( null, tasks );
-);
+});
 
 // -------------------------------------
 //   Task: Clean: Destination
 // -------------------------------------
 
 gulp.task( 'clean:dist', () => {
-    return del( options.clean.dist.files, ( err, deletedFiles ) =>
+    return del( options.clean.dist.files, ( err, deletedFiles ) => {
         notify( options.clean.dist.message, 'crazy' );
         if ( !err ) throwError( err );
-    );
+    });
 });
 
 // -------------------------------------
@@ -405,10 +407,10 @@ gulp.task( 'clean:dist', () => {
 gulp.task( 'css', () => {
     notify( options.css.message, 'writing' );
     return gulp.src( options.css.files )
-        .pipe( $.plumber( (error) =>
+        .pipe( $.plumber( (error) => {
             notify( error.message, 'fuck' );
             this.emit( 'end' );
-        ))
+        }))
         .pipe( $.sourcemaps.init() )
         .pipe( $.sass( options.css.scss_args ))
         .pipe( $.combineMq( options.css.combineMq_args ))
@@ -443,14 +445,14 @@ gulp.task( 'concat:json', () => {
 
 gulp.task( 'concat:scripts', () => {
     return gulp.src( options.concat.scripts.files )
-        .pipe( $.uglify() )
-        .pipe( $.plumber( (error) =>
+        .pipe( $.plumber( (error) => {
             notify(error.message, 'fuck');
             this.emit('end');
-        ))
+        }))
         .pipe($.jshint())
         .pipe($.jshint.reporter('jshint-stylish'))
         .pipe( $.concat( options.concat.scripts.file, { newLine: ';' } ))
+        .pipe( $.uglify() )
         .pipe( $.size({ title : 'js' }))
         .pipe( gulp.dest( options.concat.scripts.destination ));
 });
@@ -566,9 +568,9 @@ gulp.task( 'svg-sprite', options.svg.tasks, () =>
 //   Task: Watch
 // -------------------------------------
 
-gulp.task( 'watch', options.watch.tasks, () =>
+gulp.task( 'watch', options.watch.tasks, () => {
     var watchFiles = options.watch.files();
     watchFiles.forEach( ( files, index ) =>
-        gulp.watch( files, options.watch.run()[ index ] );
+        gulp.watch( files, options.watch.run()[ index ] )
     );
-);
+});

@@ -1,15 +1,15 @@
 Common:
-    title: "Gulp + Twig Starter kit"
+    title: "Gulp + Twig starter kit for landings"
     canonical: "http://italodr.com"
-    description: "Gulp & Twig starter kit for quick projects kickoff"
+    description: "Gulp + Twig starter kit for landings. For quick projects kickoff"
     open_graph:
         -
-            title: "Gulp + Twig Starter kit"
+            title: "Gulp + Twig starter kit for landings"
         -
-            site_name: "Gulp + Twig Starter kit"
+            site_name: "Gulp starter kit"
         -
             image: "http://italodr.com/og-image.png"
         -
             url: "http://italodr.com"
         -
-            description: "Gulp & Twig starter kit for quick projects kickoff"
+            description: "Gulp + Twig starter kit for landings. For quick projects kickoff"
