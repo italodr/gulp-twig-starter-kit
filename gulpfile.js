@@ -25,12 +25,7 @@
 *   `images`
 *   `javascripts`
 *   `markup`
-*   `markup:generate`
-*   `publish`
-*   `publish:set`
-*   `publish:build`
-*   `release`
-*   `release:zip`
+*   `serve`
 *   `svg-sprite`
 *   `watch`
 *
@@ -47,7 +42,6 @@
  * gulp-combine-mq      : Combine media queries
  * gulp-concat          : Concatenate files
  * gulp-csso            : Minify CSS with CSSO
- * gulp-email           : Send email
  * gulp-grunt           : Run grunt tasks from gulp (grunticon)
  * gulp-imagemin        : Minify images
  * gulp-load-plugins    : Automatically load Gulp plugins
@@ -75,29 +69,28 @@
  *
  ***************************************/
 
-'use strict';
+var gulp = require('gulp'),
+    gulpLoadPlugins = require('gulp-load-plugins'),
+    browserSync = require('browser-sync'),
+    del = require('del'),
+    exec = require('child_process').exec,
+    fs = require('fs'),
+    glob = require('glob'),
+    svgo = require('imagemin-svgo'),
+    runSequence = require('run-sequence'),
+    pagespeed = require('psi'),
+    config = require('./gulp.config.json');
 
-// Babel handles the use of new JavaScript features.
-// Learn more at: https://babeljs.io/docs/learn-es2015/
-import gulp from 'gulp';
-import gulpLoadPlugins from 'gulp-load-plugins';
-import browserSync from 'browser-sync';
-import del from 'del';
-import childProcess from 'child_process';
-import fs from 'fs';
-import glob from 'glob';
-import svgo from 'imagemin-svgo';
-import runSequence from 'run-sequence';
-import {output as pagespeed} from 'psi';
-
-const $ = gulpLoadPlugins({
+var $ = gulpLoadPlugins({
     camelize: true,
     rename : {
         'gulp-util' : 'gutil'
     }
 });
-const exec = childProcess.exec;
-const reload = browserSync.reload;
+var reload = browserSync.reload,
+    routes = config.routes,
+    vars = config.vars,
+    timestamp = new Date().getTime();
 
 $.grunt(gulp);
 
@@ -106,17 +99,17 @@ $.grunt(gulp);
 // -------------------------------------
 function consoleLog(message, kaomoji) {
     kaomoji = kaomoji || 'writing';
-    $.gutil.log(opts.kaomoji[kaomoji] +' '+ message);
+    $.gutil.log(vars.kaomoji[kaomoji] +' '+ message);
 }
 
 function errorAlert(error) {
-    let quotes       = $.gutil.colors.gray('\''),
+    var quotes       = $.gutil.colors.gray('\''),
         message      = 'Error compiling. '+ error.message +' ',
         fileName     = quotes + $.gutil.colors.cyan('Error') + quotes,
-        errorMessage = $.gutil.colors.red(message + opts.kaomoji.fuck);
+        errorMessage = $.gutil.colors.red(message + vars.kaomoji.fuck);
 
 	$.notify.onError({
-        title: 'You have an error!  ' + opts.kaomoji.fuck,
+        title: 'You have an error!  ' + vars.kaomoji.fuck,
         message: 'Please, check your terminal.',
         sound: 'Sosumi'
     })(error);
@@ -125,57 +118,16 @@ function errorAlert(error) {
 }
 
 function parseJsonFiles() {
-    let data = fs.readFileSync(routes.src.data +'/data.json', 'utf-8');
+    var data = fs.readFileSync(routes.src.data +'/data.json', 'utf-8');
     data = JSON.parse(data.toString());
-    opts.json_data = data;
+    return data;
 }
-
-// -------------------------------------
-//   Routes
-// -------------------------------------
-const routes = {
-    tmp : '.tmp',
-    src : {
-        base : 'src',
-        data : 'src/data',
-        markup : 'src/markup',
-        scss : 'src/assets/scss',
-        fonts : 'src/assets/fonts',
-        image : 'src/assets/images',
-        svg : 'src/assets/images/svg-icons',
-        javascript : 'src/assets/javascripts'
-    },
-    dest : {
-        base : 'dist',
-        scss : 'dist/assets/stylesheets',
-        javascript : 'dist/assets/javascripts',
-        fonts : 'dist/assets/fonts',
-        image : 'dist/assets/images',
-        svg : 'dist/assets/images/svg-icons'
-    }
-};
-
-// -------------------------------------
-//   Variables
-// -------------------------------------
-const timestamp = new Date().getTime();
-var opts = {
-    json_data : {},
-    kaomoji : {
-        common :  '(」゜ロ゜)」',
-        crazy :   '(⊙_◎)',
-        fuck :    '(╯°□°）╯︵ ┻━┻',
-        start :   '(ﾉ･ｪ･)ﾉ',
-        yeah :    '＼（＠￣∇￣＠）／',
-        writing : '＿〆(。。)'
-    }
-};
 
 // -------------------------------------
 //   Options
 // -------------------------------------
 
-const options = {
+var options = {
     // ----- Default ----- //
     default : {
         tasks : [ 'build', 'serve' ]
@@ -370,16 +322,16 @@ const options = {
 //   Task: Browser Sync
 // -------------------------------------
 
-gulp.task('browserSync', () =>
-    browserSync(options.browsersync.args)
-);
+gulp.task('browserSync', function() {
+    browserSync(options.browsersync.args);
+});
 
 // -------------------------------------
 //   Task: Build
 // -------------------------------------
 
-gulp.task('build', (callback) => {
-    let tasks = options.build.tasks;
+gulp.task('build', function(callback) {
+    var tasks = options.build.tasks;
     tasks.push(callback);
     runSequence.apply(null, tasks);
 });
@@ -388,8 +340,8 @@ gulp.task('build', (callback) => {
 //   Task: Clean: Destination
 // -------------------------------------
 
-gulp.task('clean:dist', () => {
-    return del(options.clean.dist.files, (err, deletedFiles) => {
+gulp.task('clean:dist', function() {
+    return del(options.clean.dist.files, function(err, deletedFiles) {
         consoleLog(options.clean.dist.message, 'crazy');
         if (!err) errorAlert(err);
     });
@@ -399,10 +351,11 @@ gulp.task('clean:dist', () => {
 //   Task: CSS
 // -------------------------------------
 
-gulp.task('css', () => {
+gulp.task('css', function() {
     consoleLog(options.css.message, 'writing');
     return gulp.src(options.css.files)
         .pipe($.plumber({ errorHandler: errorAlert }))
+        // .pipe($.csso())
         .pipe($.sourcemaps.init())
         .pipe($.sass(options.css.scss_args))
         .pipe($.combineMq(options.css.combineMq_args))
@@ -412,7 +365,6 @@ gulp.task('css', () => {
         .pipe($.sourcemaps.write('.', options.css.sourcemaps_args))
         .pipe(gulp.dest(options.css.destination))
         .pipe($.rename({ suffix : '.min' }))
-        .pipe($.csso())
         .pipe($.size({ title : 'css' }))
         .pipe(gulp.dest(options.css.destination));
 });
@@ -421,7 +373,7 @@ gulp.task('css', () => {
 //   Task: Concat: Json
 // -------------------------------------
 
-gulp.task('concat:json', () => {
+gulp.task('concat:json', function() {
     return gulp.src(options.concat.json.files)
         .pipe($.plumber({ errorHandler: errorAlert }))
         .pipe($.concat(options.concat.json.file))
@@ -434,10 +386,9 @@ gulp.task('concat:json', () => {
 //   Task: Concat: Scripts
 // -------------------------------------
 
-gulp.task('concat:scripts', () => {
+gulp.task('concat:scripts', function() {
     return gulp.src(options.concat.scripts.files)
         .pipe($.plumber({ errorHandler: errorAlert }))
-        .pipe($.jshint.reporter('jshint-stylish'))
         .pipe($.concat(options.concat.scripts.file, { newLine: ';' }))
         .pipe($.uglify())
         .pipe($.size({ title : 'js' }))
@@ -448,7 +399,7 @@ gulp.task('concat:scripts', () => {
 //   Task: Concat: Polyfills
 // -------------------------------------
 
-gulp.task('concat:polyfills', () => {
+gulp.task('concat:polyfills', function() {
     return gulp.src(options.concat.polyfills.files)
         .pipe($.uglify())
         .pipe($.concat(options.concat.polyfills.file, { newLine: ';' }))
@@ -460,7 +411,7 @@ gulp.task('concat:polyfills', () => {
 //   Task: Copy: Javascripts
 // -------------------------------------
 
-gulp.task('copy:javascripts', () => {
+gulp.task('copy:javascripts', function() {
     return gulp.src(options.copy.javascripts.files)
         .pipe($.size({ title : 'libs', showFiles: true }))
         .pipe(gulp.dest(options.copy.javascripts.destination));
@@ -470,7 +421,7 @@ gulp.task('copy:javascripts', () => {
 //   Task: Copy: Fonts
 // -------------------------------------
 
-gulp.task('copy:fonts', () => {
+gulp.task('copy:fonts', function() {
     return gulp.src(options.copy.fonts.files)
         .pipe(gulp.dest(options.copy.fonts.destination));
 });
@@ -479,13 +430,17 @@ gulp.task('copy:fonts', () => {
 //   Task: Default
 // -------------------------------------
 
-gulp.task('default', options.default.tasks);
+gulp.task('default', function(callback) {
+    var tasks = options.default.tasks;
+    tasks.push(callback);
+    runSequence.apply(null, tasks);
+});
 
 // -------------------------------------
 //   Task: Imagemin
 // -------------------------------------
 
-gulp.task('imagemin', () => {
+gulp.task('imagemin', function() {
     return gulp.src(options.imagemin.files)
         .pipe($.imagemin(options.imagemin.args))
         .pipe(svgo(options.imagemin.svgo)())
@@ -508,26 +463,26 @@ gulp.task('javascripts', options.javascripts.tasks);
 //   Task: Lint
 // -------------------------------------
 
-gulp.task('lint', () =>
+gulp.task('lint', function() {
     gulp.src(routes.src.javascripts +'*.js')
         .pipe($.eslint())
         .pipe($.eslint.format())
         .pipe($.if(!browserSync.active, $.eslint.failOnError()))
-);
+});
 
 // -------------------------------------
 //   Task: Markup
 // -------------------------------------
 
-gulp.task('markup', options.markup.tasks, () => {
+gulp.task('markup', options.markup.tasks, function() {
     if (!fs.existsSync(options.markup.data)) {
         errorAlert();
         return true;
     }
-    parseJsonFiles();
 
-    let twig_args = {
-        data: opts.json_data,
+    var data = parseJsonFiles(),
+        twig_args = {
+        data: data,
         cache: false,
         functions: [],
         filters: []
@@ -546,29 +501,35 @@ gulp.task('markup', options.markup.tasks, () => {
 //   Task: Pagespeed
 // -------------------------------------
 
-gulp.task('pagespeed', callback =>
+gulp.task('pagespeed', function(callback) {
     pagespeed(options.pagespeed.url, options.pagespeed.args, callback)
-);
+});
+
+// -------------------------------------
+//   Task: Serve
+// -------------------------------------
+
+gulp.task('serve', options.serve.tasks);
 
 // -------------------------------------
 //   Task: SVG Sprites
 // -------------------------------------
 
-gulp.task('svg-sprite', options.svg.tasks, () =>
+gulp.task('svg-sprite', options.svg.tasks, function() {
     gulp.src(options.svg.files)
         .pipe($.csso())
         .pipe($.rename({ suffix:'.min' }))
         .pipe($.size({ title : 'grunticon' }))
         .pipe(gulp.dest(options.svg.destination))
-);
+});
 
 // -------------------------------------
 //   Task: Watch
 // -------------------------------------
 
-gulp.task('watch', () => {
+gulp.task( 'watch', function() {
     var watchFiles = options.watch.files();
-    watchFiles.forEach((files, index) =>
-        gulp.watch(files, options.watch.run()[ index ]
-    );
+    watchFiles.forEach( function( files, index ) {
+        gulp.watch( files, options.watch.run()[ index ] );
+    });
 });

@@ -1,0 +1,33 @@
+{
+    "vars" : {
+        "kaomoji" : {
+            "common" : "(」゜ロ゜)」",
+            "crazy" : "(⊙_◎)",
+            "fuck" : "(╯°□°）╯︵ ┻━┻",
+            "start" : "(ﾉ･ｪ･)ﾉ",
+            "yeah" : "＼（＠￣∇￣＠）／",
+            "writing" : "＿〆(。。)"
+        }
+    },
+    "routes" : {
+        "tmp" : ".tmp",
+        "src" : {
+            "base" : "src",
+            "data" : "src/data",
+            "markup" : "src/markup",
+            "scss" : "src/assets/scss",
+            "fonts" : "src/assets/fonts",
+            "image" : "src/assets/images",
+            "svg" : "src/assets/images/svg-icons",
+            "javascript" : "src/assets/javascript"
+        },
+        "dest" : {
+            "base" : "dist",
+            "scss" : "dist/assets/stylesheets",
+            "javascript" : "dist/assets/javascripts",
+            "fonts" : "dist/assets/fonts",
+            "image" : "dist/assets/images",
+            "svg" : "dist/assets/images/svg-icon"
+        }
+    }
+}
